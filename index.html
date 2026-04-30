@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Do You Love Me?</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+    .container {
+      width: 90%;
+      max-width: 380px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 35px 25px;
+      border-radius: 25px;
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    .sticker {
+      font-size: 4rem;
+      margin-bottom: 15px;
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    h1 {
+      color: #fff;
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+      text-shadow: 0 2px 10px rgba(233, 69, 96, 0.5);
+    }
+    .sub-text {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 1rem;
+      margin-bottom: 30px;
+      min-height: 24px;
+    }
+    .btn-container {
+      position: relative;
+      height: 120px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 14px 35px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
+    }
+    .btn:active {
+      transform: scale(0.95);
+    }
+    #yesBtn {
+      background: linear-gradient(135deg, #e94560, #ff6b6b);
+      color: white;
+      z-index: 2;
+    }
+    #noBtn {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      transition: all 0.4s ease;
+      z-index: 1;
+    }
+    .hidden {
+      display: none;
+    }
+    #result {
+      color: #fff;
+      font-size: 1.6rem;
+      line-height: 1.4;
+      animation: fadeIn 0.8s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .hearts {
+      position: fixed;
+      font-size: 1.5rem;
+      animation: float 3s ease-in forwards;
+      opacity: 0;
+      pointer-events: none;
+    }
+    @keyframes float {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sticker" id="sticker">🥺</div>
+    <h1>Do You Love Me?</h1>
+    <p class="sub-text" id="subText"></p>
+    
+    <div class="btn-container" id="btnContainer">
+      <button class="btn" id="yesBtn">Yes ❤️</button>
+      <button class="btn" id="noBtn">No 😒</button>
+    </div>
+    
+    <div id="result" class="hidden"></div>
+  </div>
+
+  <script>
+    const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
+    const result = document.getElementById('result');
+    const btnContainer = document.getElementById('btnContainer');
+    const sticker = document.getElementById('sticker');
+    const subText = document.getElementById('subText');
+    
+    let noClickCount = 0;
+    let isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+
+    // Step 1: First No click
+    function handleFirstNo() {
+      noClickCount = 1;
+      sticker.innerHTML = '😢';
+      subText.innerHTML = 'Ek baar aur soch lo...';
+      yesBtn.innerHTML = 'Soch Liya ❤️';
+      noBtn.innerHTML = 'Nahi 😔';
+    }
+
+    // Step 2: Second No click
+    function handleSecondNo() {
+      noClickCount = 2;
+      sticker.innerHTML = '🥺';
+      subText.innerHTML = 'Maan jao na yaar... Maine tumhare liye itna code likha hai 💻❤️';
+      yesBtn.innerHTML = 'Thik Hai ❤️';
+      noBtn.innerHTML = 'Bilkul Nahi';
+      // Ab No button bhagega
+      noBtn.style.position = 'absolute';
+      enableNoButtonMove();
+    }
+
+    // No button thoda thoda move karega
+    function enableNoButtonMove() {
+      const moveEvent = isMobile ? 'touchstart' : 'mouseover';
+      noBtn.addEventListener(moveEvent, moveButton);
+      noBtn.addEventListener('click', (e) => {
+        if (noClickCount >= 2) {
+          e.preventDefault();
+          moveButton();
+        }
+      });
+    }
+
+    function moveButton() {
+      const containerRect = btnContainer.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+      
+      // Thoda thoda hi move karega - 60px max
+      const maxMove = 60;
+      const currentLeft = parseInt(noBtn.style.left) || 0;
+      const currentTop = parseInt(noBtn.style.top) || 0;
+      
+      let newLeft = currentLeft + (Math.random() - 0.5) * maxMove * 2;
+      let newTop = currentTop + (Math.random() - 0.5) * maxMove * 2;
+      
+      // Boundary check
+      const maxX = (containerRect.width - btnRect.width) / 2;
+      const maxY = (containerRect.height - btnRect.height) / 2;
+      
+      newLeft = Math.max(-maxX, Math.min(maxX, newLeft));
+      newTop = Math.max(-maxY, Math.min(maxY, newTop));
+      
+      noBtn.style.left = newLeft + 'px';
+      noBtn.style.top = newTop + 'px';
+    }
+
+    // No button logic
+    noBtn.addEventListener('click', (e) => {
+      if (noClickCount === 0) {
+        handleFirstNo();
+      } else if (noClickCount === 1) {
+        handleSecondNo();
+      }
+    });
+
+    // Yes button - har step pe same result
+    yesBtn.addEventListener('click', () => {
+      sticker.innerHTML = '😍';
+      subText.innerHTML = '';
+      btnContainer.classList.add('hidden');
+      result.innerHTML = 'Yes! I knew it very well...<br>I Love You Too Baby ❤️';
+      result.classList.remove('hidden');
+      createHearts();
+    });
+
+    // Hearts animation
+    function createHearts() {
+      for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+          const heart = document.createElement('div');
+          heart.classList.add('hearts');
+          heart.innerHTML = '❤️';
+          heart.style.left = Math.random() * 100 + 'vw';
+          heart.style.animationDelay = Math.random() * 1 + 's';
+          document.body.appendChild(heart);
+          setTimeout(() => heart.remove(), 3000);
+        }, i * 150);
+      }
+    }
+  </script>
+</body>
+</html>
